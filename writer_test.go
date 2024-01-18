@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var logEventJSON = []byte(`{"level":"error","requestId":"bee07485-2485-4f64-99e1-d10165884ca7","error":"dial timeout","time":"2020-06-25T17:19:00+03:00","message":"test message"}`)
+var logEventJSON = []byte(`{"level":"error","requestId":"bee07485-2485-4f64-99e1-d10165884ca7","error":"dial timeout","time":"2020-06-25T17:19:00+03:00","test":"test","message":"test message"}`)
 
 func TestParseLogEvent(t *testing.T) {
 	ts := time.Now()
@@ -36,7 +36,8 @@ func TestParseLogEvent(t *testing.T) {
 	require.Len(t, ev.Exception, 1)
 	assert.Equal(t, "dial timeout", ev.Exception[0].Value)
 
-	require.Len(t, ev.Extra, 1)
+	require.Len(t, ev.Extra, 2)
+	assert.Equal(t, "test", ev.Extra["test"])
 	assert.Equal(t, "bee07485-2485-4f64-99e1-d10165884ca7", ev.Extra["requestId"])
 }
 
@@ -57,6 +58,7 @@ func TestWrite(t *testing.T) {
 		require.Len(t, event.Exception, 1)
 		assert.Equal(t, "dial timeout", event.Exception[0].Value)
 		assert.True(t, time.Since(event.Timestamp).Minutes() < 1)
+		assert.Equal(t, "test", event.Extra["test"])
 		assert.Equal(t, "bee07485-2485-4f64-99e1-d10165884ca7", event.Extra["requestId"])
 		beforeSendCalled = true
 		return event
@@ -73,6 +75,7 @@ func TestWrite(t *testing.T) {
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
 	log.Err(errors.New("dial timeout")).
+		Str("test", "test").
 		Msg("test message")
 
 	require.Nil(t, zerologError)
@@ -96,7 +99,7 @@ func TestWrite_TraceDoesNotPanic(t *testing.T) {
 	log := zerolog.New(io.MultiWriter(writer)).With().Timestamp().
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
-	log.Trace().Msg("test message")
+	log.Trace().Str("test", "test").Msg("test message")
 
 	require.Nil(t, zerologError)
 	require.False(t, beforeSendCalled)
@@ -110,6 +113,7 @@ func TestWriteLevel(t *testing.T) {
 		require.Len(t, event.Exception, 1)
 		assert.Equal(t, "dial timeout", event.Exception[0].Value)
 		assert.True(t, time.Since(event.Timestamp).Minutes() < 1)
+		assert.Equal(t, "test", event.Extra["test"])
 		assert.Equal(t, "bee07485-2485-4f64-99e1-d10165884ca7", event.Extra["requestId"])
 		beforeSendCalled = true
 		return event
@@ -125,6 +129,7 @@ func TestWriteLevel(t *testing.T) {
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
 	log.Err(errors.New("dial timeout")).
+		Str("test", "test").
 		Msg("test message")
 
 	require.Nil(t, zerologError)
@@ -151,6 +156,7 @@ func TestWrite_Disabled(t *testing.T) {
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
 	log.Err(errors.New("dial timeout")).
+		Str("test", "test").
 		Msg("test message")
 
 	require.Nil(t, zerologError)
@@ -176,6 +182,7 @@ func TestWriteLevel_Disabled(t *testing.T) {
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
 	log.Err(errors.New("dial timeout")).
+		Str("test", "test").
 		Msg("test message")
 
 	require.Nil(t, zerologError)
