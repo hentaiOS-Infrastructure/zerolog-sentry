@@ -177,8 +177,13 @@ func (w *Writer) parseLogEvent(data []byte) (*sentry.Event, bool) {
 		case zerolog.LevelFieldName, zerolog.TimestampFieldName:
 		default:
 			content, err := value.Value.String()
-			if err != nil {
-				// it might be an embedded json => skip this entry
+			// Handle nested JSON as RAW object
+			if errors.Is(err, ast.ErrUnsupportType) {
+				content, err = value.Value.Raw()
+				if err != nil {
+					continue
+				}
+			} else if err != nil {
 				continue
 			}
 			event.Extra[value.Key] = content

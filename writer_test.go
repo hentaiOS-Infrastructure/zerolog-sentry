@@ -1,6 +1,7 @@
 package zlogsentry
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"testing"
@@ -51,6 +52,8 @@ func TestParseLogLevel(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
+	slcD := []string{"apple", "peach", "pear"}
+	jsontest, _ := json.Marshal(slcD)
 	beforeSendCalled := false
 	writer, err := New("", WithBeforeSend(func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
 		assert.Equal(t, sentry.LevelError, event.Level)
@@ -59,6 +62,7 @@ func TestWrite(t *testing.T) {
 		assert.Equal(t, "dial timeout", event.Exception[0].Value)
 		assert.True(t, time.Since(event.Timestamp).Minutes() < 1)
 		assert.Equal(t, "test", event.Extra["test"])
+		assert.Equal(t, "[\"apple\",\"peach\",\"pear\"]", event.Extra["testjson"])
 		assert.Equal(t, "bee07485-2485-4f64-99e1-d10165884ca7", event.Extra["requestId"])
 		beforeSendCalled = true
 		return event
@@ -75,6 +79,7 @@ func TestWrite(t *testing.T) {
 		Str("requestId", "bee07485-2485-4f64-99e1-d10165884ca7").
 		Logger()
 	log.Err(errors.New("dial timeout")).
+		RawJSON("testjson", jsontest).
 		Str("test", "test").
 		Msg("test message")
 
