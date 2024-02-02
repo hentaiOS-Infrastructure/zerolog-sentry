@@ -195,7 +195,7 @@ func (w *Writer) parseLogEvent(data []byte) (*sentry.Event, bool) {
 
 func newStacktrace() *sentry.Stacktrace {
 	const (
-		module       = "github.com/archdx/zerolog-sentry"
+		module       = "github.com/hentaiOS-Infrastructure/zerolog-sentry"
 		loggerModule = "github.com/rs/zerolog"
 	)
 
