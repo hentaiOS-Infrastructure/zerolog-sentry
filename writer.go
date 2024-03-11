@@ -238,24 +238,24 @@ func (fn optionFunc) apply(c *config) { fn(c) }
 type EventHintCallback func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event
 
 type config struct {
-	levels           []zerolog.Level
-	sampleRate       float64
-	release          string
-	environment      string
-	serverName       string
-	ignoreErrors     []string
-	breadcrumbs      bool
-	debug            bool
-	tracing          bool
 	debugWriter      io.Writer
-	httpClient       *http.Client
-	httpProxy        string
-	httpsProxy       string
+	beforeSend       sentry.EventProcessor
 	caCerts          *x509.CertPool
+	httpClient       *http.Client
+	httpsProxy       string
+	httpProxy        string
+	release          string
+	serverName       string
+	environment      string
+	ignoreErrors     []string
+	levels           []zerolog.Level
 	maxErrorDepth    int
 	flushTimeout     time.Duration
-	beforeSend       sentry.EventProcessor
+	sampleRate       float64
 	tracesSampleRate float64
+	tracing          bool
+	debug            bool
+	breadcrumbs      bool
 }
 
 // WithLevels configures zerolog levels that have to be sent to Sentry.
